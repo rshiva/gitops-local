@@ -1,0 +1,28 @@
+services:
+  dynamodb:
+    image: amazon/dynamodb-local
+    hostname: dynamodb
+    ports:
+      - "8000:8000"
+    command: ["-jar", "DynamoDBLocal.jar", "-inMemory"]
+    restart: on-failure
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    depends_on:
+      - dynamodb
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://dynamodb:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+    environment:
+      - AWS_DYNAMODB_ENDPOINT_URL=http://dynamodb:8000
+      - REGION_NAME=ap-south-1
+      - AWS_ACCESS_KEY_ID=fakeMyKeyId
+      - AWS_SECRET_ACCESS_KEY=fakeSecretAccessKey

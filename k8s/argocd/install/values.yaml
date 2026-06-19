@@ -1,0 +1,111 @@
+argo-cd:    # must match the dependency name in Chart.yaml
+
+    # ── Global ────────────────────────────────────────────────────────────────
+    global:
+      image:
+        tag: "v9.5.17"    # pin a specific ArgoCD version — change this to upgrade
+
+    # ── Application Controller ────────────────────────────────────────────────
+    # The controller watches all your ArgoCD Applications and reconciles
+    # the cluster state with Git. It's stateful (uses leader election),
+    # so scaling uses replicas + sharding — NOT a standard HPA.
+    controller:
+      replicas: 2   # 2 replicas = 1 active + 1 standby (leader election)
+
+      # Sharding: splits your Applications across controller replicas.
+      # Without sharding, only the leader does real work — replicas are hot standby.
+      env:
+        - name: ARGOCD_CONTROLLER_REPLICAS
+          value: "2"    # must match replicas above — tells each pod how many shards exist
+
+      resources:
+        requests:
+          cpu: 250m
+          memory: 256Mi
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+
+      # Metrics — expose /metrics for Prometheus scraping
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: false    # set true if you have Prometheus Operator installed
+
+    # ── Repo Server ───────────────────────────────────────────────────────────
+    # Clones Git repos, runs Helm/Kustomize, and renders manifests.
+    # This is stateless — you can scale it horizontally like a normal Deployment.
+    # Scale up when you have many apps or slow Git/Helm renders.
+    repoServer:
+      replicas: 2    # stateless — straightforward horizontal scaling
+
+      autoscaling:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 5
+        targetCPUUtilizationPercentage: 70
+        targetMemoryUtilizationPercentage: 80
+
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: false
+
+    # ── ApplicationSet Controller ─────────────────────────────────────────────
+    # Generates many ArgoCD Applications from one template (e.g., one App per
+    # environment, or one per microservice). Stateless — scale horizontally.
+    applicationSet:
+      replicas: 2    # HA mode — one leader processes, others are standby
+
+      resources:
+        requests:
+          cpu: 100m
+          memory: 64Mi
+        limits:
+          cpu: 250m
+          memory: 256Mi
+
+      metrics:
+        enabled: true
+        serviceMonitor:
+          enabled: false
+
+    # ── Server (UI + API) ─────────────────────────────────────────────────────
+    server:
+      replicas: 2
+
+      autoscaling:
+        enabled: true
+        minReplicas: 2
+        maxReplicas: 4
+        targetCPUUtilizationPercentage: 80
+
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+
+      # Expose UI — change to LoadBalancer or use an Ingress for real clusters
+      service:
+        type: ClusterIP
+
+    # ── Redis ──────────────────────────────────────────────────────────────────
+    redis:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi

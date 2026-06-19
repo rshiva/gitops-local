@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: python-dynamo-lab-app-pdb
+  namespace: python-dynamo-lab
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: python-dynamo-lab-app

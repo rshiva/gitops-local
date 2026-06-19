@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-all-local-dev
+  namespace: python-dynamo-lab
+spec:
+  podSelector: {}    # applies to all pods in the namespace
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - {}    # allow all ingress (port-forward, curl, etc.)
+  egress:
+    - {}    # allow all egress (DynamoDB on :4566, DNS, etc.)

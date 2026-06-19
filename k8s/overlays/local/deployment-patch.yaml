@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-dynamo-lab-app
+  namespace: python-dynamo-lab
+spec:
+  replicas: 1    # 1 replica is enough for local — saves memory
+  template:
+    spec:
+      containers:
+        - name: python-dynamo-lab-app
+          env:
+            - name: AWS_DEFAULT_REGION
+              value: "ap-south-1"
+            - name: AWS_ACCESS_KEY_ID
+              value: "test"
+            - name: AWS_SECRET_ACCESS_KEY
+              value: "test"
+            - name: AWS_DYNAMODB_ENDPOINT_URL
+              value: "http://dynamodb-svc:8001"

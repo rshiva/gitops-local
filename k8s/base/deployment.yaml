@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-dynamo-lab-app
+  namespace: python-dynamo-lab
+  labels:
+    app: python-dynamo-lab-app
+    app.kubernetes.io/name: python-dynamo-lab-app
+    app.kubernetes.io/version: "1.0.0"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: python-dynamo-lab-app
+  template:
+    metadata:
+      labels:
+        app: python-dynamo-lab-app
+    spec:
+      # serviceAccountName must be under spec.template.spec, not spec
+      serviceAccountName: python-dynamo-lab-sa
+      # pod-level security context (fsGroup, runAs*) belongs here, not under spec
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      # spread pods evenly across AZs; ScheduleAnyway avoids blocking on single-AZ clusters
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone  # fixed: was topologykey (lowercase k)
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: python-dynamo-lab-app
+      containers:
+        - name: python-dynamo-lab-app
+          image: python-dynamo-lab-app-image
+          env:
+            - name: AWS_DEFAULT_REGION
+              value: "ap-south-1"
+          ports:
+            - containerPort: 8001
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            failureThreshold: 10
+            periodSeconds: 5
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL

@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# All resources from base are deployed into this namespace.
+# The Namespace resource in base is also named python-dynamo-lab, so they stay in sync.
+namespace: python-dynamo-lab
+
+resources:
+  - ../../base
+
+# Inject environment label on all resources without adding it to pod selectors.
+# Removed namePrefix: dev- because it renamed the Namespace resource to dev-python-dynamo-lab
+# while namespace: above kept resources in python-dynamo-lab — the Namespace object and
+# the target namespace were different names.
+labels:
+  - pairs:
+      environment: dev
+    includeSelectors: false
+
+images:
+  - name: python-dynamo-lab-app-image
+    newName: 640565834670.dkr.ecr.ap-south-1.amazonaws.com/devopsrt-homelab-dev
+    newTag: latest  # overwritten at deploy time by `kustomize edit set image` in cd.yaml
+
+patches:
+  - path: deployment-patch.yaml

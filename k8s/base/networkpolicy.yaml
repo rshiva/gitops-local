@@ -1,0 +1,78 @@
+
+# default deny all ingress + egress
+# allow: ingress from ALB only on port 8000
+# allow: egress to DynamoDB VPC endpoint only
+# allow: egress DNS port 53
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: python-dynamo-lab-app-deny-allow
+  namespace: python-dynamo-lab
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+
+---
+# Policy 2: Allow ALB to reach app pods on port 8001
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: python-dynamo-lab-app-allow-alb-ingress
+  namespace: python-dynamo-lab
+spec:
+  podSelector:
+    matchLabels:
+      app: python-dynamo-lab-app
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 10.0.0.0/16  # fixed: cidr must be indented under ipBlock, not a sibling
+    ports:
+    - protocol: TCP
+      port: 8001
+
+---
+# Policy 3: Allow DNS resolution (required for all pods)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: python-dynamo-lab-app-allow-dns-egress
+  namespace: python-dynamo-lab
+spec:
+  podSelector:
+    matchLabels:
+      app: python-dynamo-lab-app
+  policyTypes:
+  - Egress
+  egress:
+  - ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+
+---
+# Policy 4: Allow egress to DynamoDB via HTTPS
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: python-dynamo-lab-app-allow-dynamodb-egress
+  namespace: python-dynamo-lab
+spec:
+  podSelector:
+    matchLabels:
+      app: python-dynamo-lab-app
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0  # fixed: same indentation bug as ALB policy; tighten to VPC endpoint CIDR when available
+    ports:
+    - protocol: TCP
+      port: 443

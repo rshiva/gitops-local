@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-dynamo-lab-app
+  namespace: python-dynamo-lab
+  labels:
+    app: python-dynamo-lab-app
+    app.kubernetes.io/name: python-dynamo-lab-app
+    app.kubernetes.io/version: "1.0.0"
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: python-dynamo-lab-app  # fixed: must match container name in base, not the image name
+          env:
+            - name: AWS_DEFAULT_REGION
+              value: "ap-south-1"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi

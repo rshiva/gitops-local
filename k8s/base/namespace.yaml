@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=kubernetes
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: python-dynamo-lab
+  labels:
+    kubernetes.io/metadata.name: python-dynamo-lab
+    app.kubernetes.io/managed-by: kustomize  # fixed: was "helm", these manifests are managed by kustomize
+    team: platform
+    # environment label is injected per-overlay via kustomization.yaml labels
