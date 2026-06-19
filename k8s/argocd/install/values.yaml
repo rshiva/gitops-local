@@ -1,9 +1,9 @@
 argo-cd:    # must match the dependency name in Chart.yaml
 
     # ── Global ────────────────────────────────────────────────────────────────
-    global:
-      image:
-        tag: "v9.5.17"    # pin a specific ArgoCD version — change this to upgrade
+    # global:
+    #   image:
+    #     tag: "v9.5.17"    # pin a specific ArgoCD version — change this to upgrade
 
     # ── Application Controller ────────────────────────────────────────────────
     # The controller watches all your ArgoCD Applications and reconciles
