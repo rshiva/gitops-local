@@ -72,11 +72,7 @@ def test_create_user_missing_fields(setup_dynamodb):
     response = client.post("/user/create", json=user_data)
 
     # FastAPI/Pydantic should return 422 Unprocessable Entity for validation errors
-    # assert response.status_code == 422
-    assert response.status_code == 999
-
-def untested_function():
-    return "I have no test"
+    assert response.status_code == 422
 
 def test_get_user_by_id_success(setup_dynamodb):
     client = get_client()
