@@ -32,6 +32,7 @@ tables = [
 
 def create_tables(db_resource=None):
     db = db_resource or dynamodb
+    password = "admin123"
     for table_def in tables:
         try:
             db.create_table(
