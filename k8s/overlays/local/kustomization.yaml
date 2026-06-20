@@ -3,15 +3,15 @@ kind: Kustomization
 namespace: python-dynamo-lab
 
 resources:
-   - ../../base
-   - networkpolicy-local.yaml
-   - dynamodb-local.yaml
-   - dynamodb-service.yaml
+- ../../base
+- networkpolicy-local.yaml
+- dynamodb-local.yaml
+- dynamodb-service.yaml
 
 images:
-   - name: python-dynamo-lab-app-image
-     newName:  rshiva86/devopsrt-homelab-local
-     newTag: latest
+- name: python-dynamo-lab-app-image
+  newName: rshiva86/devopsrt-homelab-local
+  newTag: 75efc785ab34b5fd56e7b989676713da6998dbd2
 
 patches:
-  - path: deployment-patch.yaml
+- path: deployment-patch.yaml
