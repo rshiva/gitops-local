@@ -37,8 +37,8 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
             docker build \
-            - t ${{ secrets.DOCKERHUB_USERNAME }}/devopsrt-homelab-local:$IMAGE_TAG \
-            - t ${{ secrets.DOCKERHUB_USERNAME }}/devopsrt-homelab-local:latest \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/devopsrt-homelab-local:$IMAGE_TAG \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/devopsrt-homelab-local:latest \
             ./app
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/devopsrt-homelab-local:$IMAGE_TAG
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/devopsrt-homelab-local:latest
