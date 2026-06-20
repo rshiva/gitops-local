@@ -10,8 +10,8 @@ resources:
 
 images:
    - name: python-dynamo-lab-app-image
-     newName: python-dynamo-lab
-     newTag: local
+     newName:  rshiva86/devopsrt-homelab-local
+     newTag: latest
 
 patches:
   - path: deployment-patch.yaml
